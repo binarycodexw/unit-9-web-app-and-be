@@ -6,6 +6,8 @@ Node.js + Express on the backend, PostgreSQL for the data, server-side rendered 
 Users sign up, turn on two-factor authentication (TOTP), build watchlists with notes and target prices and look at
 price charts. Admins manage the list of stocks that can be followed. Prices come from Alpha Vantage.
 
+Live version: https://watchsecure.onrender.com
+
 Not financial advice, and the prices in the seed data are made up.
 
 ## Stack
@@ -77,11 +79,16 @@ provider error and never makes two calls for the same stock at once.
 
 ## Deploying
 
-One Node service plus a PostgreSQL database.
+The app is live at https://watchsecure.onrender.com. It runs as a Render web service with a Render PostgreSQL database in the same region. It is on the free plan, so it pauses when idle and the first request after a pause can take a minute.
 
-1. Create a hosted PostgreSQL database (Neon, Supabase...) and run `npm run db:init` against it.
-2. Create a web service (for example on Render) from the repository: build `npm install`, start `npm start`.
-3. Add the variables from `.env.example` in the dashboard (`NODE_ENV=production`, `DATABASE_SSL=true`, the secrets and, if wanted, `ALPHAVANTAGE_API_KEY`).
+To deploy your own copy:
+
+1. Create a PostgreSQL database on Render (or Neon, Supabase...).
+2. Create the tables and the admin user from your machine, using the external database URL. Put `DATABASE_URL`, `DATABASE_SSL=true`, `ADMIN_EMAIL` and `ADMIN_PASSWORD` in a file such as `.env.render` (git ignores it), run `node --env-file=.env.render scripts/init-db.js --seed` and delete the file.
+3. Create a web service from the repository: build command `npm install`, start command `node server.js`.
+4. Add the environment variables in the dashboard: `NODE_ENV=production`, `NODE_VERSION=22`, `DATABASE_URL`, `DATABASE_SSL`, `SESSION_SECRET`, `MFA_ENCRYPTION_KEY` and, if wanted, `ALPHAVANTAGE_API_KEY`. With the internal database URL of a Render database use `DATABASE_SSL=false`, with an external URL use `true`.
+
+Render provides the HTTPS certificate and redirects HTTP to HTTPS.
 
 ## Folders
 
