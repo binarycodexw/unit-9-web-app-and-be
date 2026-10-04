@@ -1,0 +1,31 @@
+<%- include('partials/header') %>
+
+<section class="narrow">
+  <h1>Enable two-factor authentication</h1>
+
+  <ol class="steps">
+    <li>Install an authenticator app such as Google Authenticator, Microsoft Authenticator or Authy.</li>
+    <li>Scan this QR code with the app.</li>
+    <li>Enter the 6-digit code shown by the app to confirm.</li>
+  </ol>
+
+  <div class="qr-box">
+    <img src="<%= qrDataUrl %>" width="220" height="220" alt="QR code to add <%= appName %> to your authenticator app">
+    <p class="hint">Cannot scan? Enter this key manually:<br><code><%= secret %></code></p>
+  </div>
+
+  <form method="post" action="/account/mfa/enable" class="form" data-validate novalidate>
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <div class="field">
+      <label for="code">Authentication code</label>
+      <input id="code" name="code" type="text" inputmode="numeric" pattern="\d{6}" maxlength="6"
+             required autocomplete="one-time-code" autofocus aria-describedby="code-error"
+             data-pattern-message="Enter exactly 6 digits.">
+      <p class="field-error" id="code-error" role="alert"><%= errors.code || '' %></p>
+    </div>
+    <button type="submit" class="button">Confirm and enable</button>
+    <a class="button button-secondary" href="/account">Cancel</a>
+  </form>
+</section>
+
+<%- include('partials/footer') %>

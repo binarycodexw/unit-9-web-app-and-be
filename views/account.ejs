@@ -1,0 +1,68 @@
+<%- include('partials/header') %>
+
+<h1>Account</h1>
+
+<section class="card">
+  <h2>Profile</h2>
+  <dl class="details">
+    <dt>Email</dt><dd><%= currentUser.email %></dd>
+    <dt>Role</dt><dd><%= currentUser.role %></dd>
+  </dl>
+</section>
+
+<section class="card">
+  <h2>Two-factor authentication</h2>
+  <% if (currentUser.mfa_enabled) { %>
+    <p><span class="badge">Enabled</span> You need your authenticator app each time you sign in.</p>
+
+    <% if (errors._mfa) { %>
+      <div class="notice notice-error" role="alert"><%= errors._mfa %></div>
+    <% } %>
+
+    <form method="post" action="/account/mfa/disable" class="form" data-validate novalidate>
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <p class="hint">To disable two-factor authentication, confirm your password and a current code.</p>
+
+      <div class="field">
+        <label for="disable-password">Password</label>
+        <input id="disable-password" name="password" type="password" required maxlength="128"
+               autocomplete="current-password" aria-describedby="disable-password-error">
+        <p class="field-error" id="disable-password-error" role="alert"><%= errors.password || '' %></p>
+      </div>
+      <div class="field">
+        <label for="disable-code">Authentication code</label>
+        <input id="disable-code" name="code" type="text" inputmode="numeric" pattern="\d{6}" maxlength="6"
+               required autocomplete="one-time-code" aria-describedby="disable-code-error"
+               data-pattern-message="Enter exactly 6 digits.">
+        <p class="field-error" id="disable-code-error" role="alert"><%= errors.code || '' %></p>
+      </div>
+      <button type="submit" class="button button-danger">Disable two-factor</button>
+    </form>
+  <% } else { %>
+    <p><span class="badge badge-alert">Disabled</span> Add a second step to protect your account.</p>
+    <p><a class="button" href="/account/mfa/setup">Enable two-factor authentication</a></p>
+  <% } %>
+</section>
+
+<section class="card">
+  <h2>Delete account</h2>
+  <p>This permanently deletes your account and all your watchlists.</p>
+
+  <% if (errors._delete) { %>
+    <div class="notice notice-error" role="alert"><%= errors._delete %></div>
+  <% } %>
+
+  <form method="post" action="/account/delete" class="form form-inline" data-validate novalidate>
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <div class="field">
+      <label for="delete-password">Confirm your password</label>
+      <input id="delete-password" name="password" type="password" required maxlength="128"
+             autocomplete="current-password" aria-describedby="delete-password-error">
+      <p class="field-error" id="delete-password-error" role="alert"></p>
+    </div>
+    <button type="submit" class="button button-danger"
+            data-confirm="Delete your account permanently? This cannot be undone.">Delete my account</button>
+  </form>
+</section>
+
+<%- include('partials/footer') %>

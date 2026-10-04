@@ -1,0 +1,89 @@
+<%- include('partials/header') %>
+
+<p><a href="/stocks">&larr; All stocks</a></p>
+<h1><%= stock.symbol %> <span class="muted"><%= stock.name %></span></h1>
+<p class="lead">
+  <span class="big-number"><%= fmtPrice(stock.last_price) %></span>
+  <span class="muted">updated <%= stock.last_price_at ? fmtDateTime(stock.last_price_at) : 'never' %> &middot; <%= stock.exchange %> &middot; <%= stock.sector %></span>
+</p>
+<% if (priceStale) { %>
+  <p class="muted">Live data is not available right now, so the last stored price is shown.</p>
+<% } %>
+
+<section class="card">
+  <div class="card-header">
+    <h2>Price history (last <%= range %> days)</h2>
+    <nav class="range-picker" aria-label="Chart period">
+      <% rangeOptions.forEach((option) => { %>
+        <% if (option === range) { %>
+          <span class="page current" aria-current="true"><%= option %>d</span>
+        <% } else { %>
+          <a class="page" href="/stocks/<%= stock.symbol %>?range=<%= option %>"><%= option %>d</a>
+        <% } %>
+      <% }) %>
+    </nav>
+  </div>
+
+  <% if (!chartJson) { %>
+    <p class="muted">Not enough data to draw a chart.</p>
+  <% } else { %>
+    <p class="change <%= change >= 0 ? 'up' : 'down' %>">
+      <%= fmtPercent(change) %> <span class="muted">over the last <%= range %> sessions</span>
+    </p>
+    <div class="chart-box">
+      <canvas data-chart="<%= chartJson %>" role="img"
+              aria-label="Line chart of the closing price of <%= stock.symbol %> over the last <%= range %> sessions. The same values are listed in the table below."></canvas>
+    </div>
+  <% } %>
+
+  <% if (history.length > 0) { %>
+    <h3>Latest sessions</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th scope="col">Date</th><th scope="col" class="num">Open</th><th scope="col" class="num">High</th><th scope="col" class="num">Low</th><th scope="col" class="num">Close</th><th scope="col" class="num">Volume</th></tr>
+        </thead>
+        <tbody>
+          <% history.forEach((row) => { %>
+            <tr>
+              <td><%= fmtDate(row.trade_date) %></td>
+              <td class="num"><%= fmtPrice(row.open_price) %></td>
+              <td class="num"><%= fmtPrice(row.high_price) %></td>
+              <td class="num"><%= fmtPrice(row.low_price) %></td>
+              <td class="num"><%= fmtPrice(row.close_price) %></td>
+              <td class="num"><%= Number(row.volume).toLocaleString('en-US') %></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
+</section>
+
+<section class="grid">
+  <article class="card">
+    <h2>Add to a watchlist</h2>
+    <% if (watchlists.length === 0) { %>
+      <p class="muted">Create a watchlist first.</p>
+    <% } else { %>
+      <ul class="plain-list">
+        <% watchlists.forEach((list) => { %>
+          <li class="list-row">
+            <span><%= list.name %></span>
+            <% if (list.has_stock) { %>
+              <span class="badge">Added</span>
+            <% } else { %>
+              <form method="post" action="/watchlists/<%= list.id %>/items" class="inline-form">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                <input type="hidden" name="stockId" value="<%= stock.id %>">
+                <button type="submit" class="button button-small">Add</button>
+              </form>
+            <% } %>
+          </li>
+        <% }) %>
+      </ul>
+    <% } %>
+  </article>
+</section>
+
+<%- include('partials/footer') %>

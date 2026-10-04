@@ -1,0 +1,23 @@
+<%- include('partials/header') %>
+
+<section class="narrow">
+  <h1>Two-factor verification</h1>
+  <p>Open your authenticator app and enter the 6-digit code for <strong><%= appName %></strong>.</p>
+
+  <form method="post" action="/login/mfa" class="form" data-validate novalidate>
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+    <div class="field">
+      <label for="code">Authentication code</label>
+      <input id="code" name="code" type="text" inputmode="numeric" pattern="\d{6}" maxlength="6"
+             required autocomplete="one-time-code" autofocus aria-describedby="code-error"
+             data-pattern-message="Enter exactly 6 digits.">
+      <p class="field-error" id="code-error" role="alert"><%= errors.code || '' %></p>
+    </div>
+
+    <button type="submit" class="button">Verify and sign in</button>
+    <p class="hint"><a href="/login">Cancel</a></p>
+  </form>
+</section>
+
+<%- include('partials/footer') %>

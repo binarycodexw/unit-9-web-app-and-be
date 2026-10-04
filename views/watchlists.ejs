@@ -1,0 +1,45 @@
+<%- include('partials/header') %>
+
+<h1>My watchlists</h1>
+
+<section class="card">
+  <% if (watchlists.length === 0) { %>
+    <p class="muted">You do not have any watchlist yet.</p>
+  <% } else { %>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th scope="col">Name</th><th scope="col" class="num">Stocks</th><th scope="col">Created</th><th scope="col"><span class="visually-hidden">Actions</span></th></tr>
+        </thead>
+        <tbody>
+          <% watchlists.forEach((list) => { %>
+            <tr>
+              <td><a href="/watchlists/<%= list.id %>"><%= list.name %></a></td>
+              <td class="num"><%= list.item_count %></td>
+              <td><%= fmtDate(list.created_at) %></td>
+              <td class="actions-cell">
+                <a class="button button-small button-secondary" href="/watchlists/<%= list.id %>">Open</a>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
+</section>
+
+<section class="card">
+  <h2>Create a watchlist</h2>
+  <form method="post" action="/watchlists" class="form form-center-button" data-validate novalidate>
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <div class="field">
+      <label for="name">Name</label>
+      <input id="name" name="name" type="text" required maxlength="60" value="<%= values.name || '' %>"
+             aria-describedby="name-error">
+      <p class="field-error" id="name-error" role="alert"><%= errors.name || '' %></p>
+    </div>
+    <button type="submit" class="button">Create</button>
+  </form>
+</section>
+
+<%- include('partials/footer') %>

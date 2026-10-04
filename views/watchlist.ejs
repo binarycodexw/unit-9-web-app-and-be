@@ -1,0 +1,122 @@
+<%- include('partials/header') %>
+
+<p><a href="/watchlists">&larr; All watchlists</a></p>
+<h1><%= watchlist.name %></h1>
+
+<section class="card">
+  <h2>Stocks in this list</h2>
+  <% if (items.length === 0) { %>
+    <p class="muted">Nothing here yet. Add a stock below.</p>
+  <% } else { %>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">Symbol</th>
+            <th scope="col" class="num">Price</th>
+            <th scope="col">Note</th>
+            <th scope="col">Target price</th>
+            <th scope="col"><span class="visually-hidden">Actions</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% items.forEach((item) => { %>
+            <tr>
+              <td>
+                <a href="/stocks/<%= item.symbol %>"><strong><%= item.symbol %></strong></a><br>
+                <span class="muted small"><%= item.name %></span>
+              </td>
+              <td class="num"><%= fmtPrice(item.last_price) %></td>
+              <%# the inputs and the Save button sit in different cells, they are tied to this form with the form attribute %>
+              <td class="note-cell">
+                <label class="visually-hidden" for="note-<%= item.id %>">Note for <%= item.symbol %></label>
+                <input id="note-<%= item.id %>" name="note" type="text" maxlength="500"
+                       form="update-<%= item.id %>" value="<%= item.note %>" placeholder="Private note">
+              </td>
+              <td>
+                <label class="visually-hidden" for="target-<%= item.id %>">Target price for <%= item.symbol %></label>
+                <input id="target-<%= item.id %>" name="targetPrice" type="number" step="0.01" min="0.01"
+                       max="1000000000" form="update-<%= item.id %>" value="<%= item.target_price ?? '' %>" placeholder="Target">
+              </td>
+              <td>
+                <div class="row-actions">
+                  <form id="update-<%= item.id %>" method="post" action="/watchlists/<%= watchlist.id %>/items/<%= item.id %>/update"
+                        class="inline-form" data-validate novalidate>
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <button type="submit" class="button button-small">Save</button>
+                  </form>
+                  <form method="post" action="/watchlists/<%= watchlist.id %>/items/<%= item.id %>/delete" class="inline-form">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <button type="submit" class="button button-small button-danger"
+                            data-confirm="Remove <%= item.symbol %> from this watchlist?">Remove</button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
+</section>
+
+<section class="card">
+  <h2>Add a stock</h2>
+  <% if (available.length === 0) { %>
+    <p class="muted">All available stocks are already in this list.</p>
+  <% } else { %>
+    <form method="post" action="/watchlists/<%= watchlist.id %>/items" class="form" data-validate novalidate>
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+      <div class="field">
+        <label for="stockId">Stock</label>
+        <select id="stockId" name="stockId" required aria-describedby="stockId-error">
+          <option value="">Choose a stock...</option>
+          <% available.forEach((stock) => { %>
+            <option value="<%= stock.id %>" <%= String(values.stockId) === String(stock.id) ? 'selected' : '' %>>
+              <%= stock.symbol %> - <%= stock.name %>
+            </option>
+          <% }) %>
+        </select>
+        <p class="field-error" id="stockId-error" role="alert"><%= itemErrors.stockId || '' %></p>
+      </div>
+
+      <div class="field">
+        <label for="note">Note (optional)</label>
+        <textarea id="note" name="note" rows="2" maxlength="500" aria-describedby="note-error"><%= values.note || '' %></textarea>
+        <p class="field-error" id="note-error" role="alert"><%= itemErrors.note || '' %></p>
+      </div>
+
+      <div class="field">
+        <label for="targetPrice">Target price (optional)</label>
+        <input id="targetPrice" name="targetPrice" type="number" step="0.01" min="0.01" max="1000000000"
+               value="<%= values.targetPrice || '' %>" aria-describedby="targetPrice-error">
+        <p class="field-error" id="targetPrice-error" role="alert"><%= itemErrors.targetPrice || '' %></p>
+      </div>
+
+      <button type="submit" class="button">Add to watchlist</button>
+    </form>
+  <% } %>
+</section>
+
+<section class="card">
+  <h2>Manage this watchlist</h2>
+  <form method="post" action="/watchlists/<%= watchlist.id %>/rename" class="form form-inline" data-validate novalidate>
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <div class="field">
+      <label for="rename">Rename</label>
+      <input id="rename" name="name" type="text" required maxlength="60"
+             value="<%= values.name || watchlist.name %>" aria-describedby="rename-error">
+      <p class="field-error" id="rename-error" role="alert"><%= errors.name || '' %></p>
+    </div>
+    <button type="submit" class="button button-secondary">Rename</button>
+  </form>
+
+  <form method="post" action="/watchlists/<%= watchlist.id %>/delete" class="spaced">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <button type="submit" class="button button-danger"
+            data-confirm="Delete this watchlist and everything in it?">Delete watchlist</button>
+  </form>
+</section>
+
+<%- include('partials/footer') %>

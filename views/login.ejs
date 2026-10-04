@@ -1,0 +1,32 @@
+<%- include('partials/header') %>
+
+<section class="narrow">
+  <h1>Sign in</h1>
+
+  <% if (errors._form) { %>
+    <div class="notice notice-error" role="alert"><%= errors._form %></div>
+  <% } %>
+
+  <form method="post" action="/login" class="form" data-validate novalidate>
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+    <div class="field">
+      <label for="email">Email</label>
+      <input id="email" name="email" type="email" required maxlength="254" autocomplete="username"
+             value="<%= values.email || '' %>" aria-describedby="email-error">
+      <p class="field-error" id="email-error" role="alert"><%= errors.email || '' %></p>
+    </div>
+
+    <div class="field">
+      <label for="password">Password</label>
+      <input id="password" name="password" type="password" required maxlength="128"
+             autocomplete="current-password" aria-describedby="password-error">
+      <p class="field-error" id="password-error" role="alert"><%= errors.password || '' %></p>
+    </div>
+
+    <button type="submit" class="button">Continue</button>
+    <p class="hint">New here? <a href="/register">Create an account</a>.</p>
+  </form>
+</section>
+
+<%- include('partials/footer') %>

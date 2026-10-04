@@ -1,0 +1,36 @@
+<%- include('partials/header') %>
+
+<section class="narrow">
+  <h1>Create your account</h1>
+
+  <form method="post" action="/register" class="form" data-validate novalidate>
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+    <div class="field">
+      <label for="email">Email</label>
+      <input id="email" name="email" type="email" required maxlength="254" autocomplete="email"
+             value="<%= values.email || '' %>" aria-describedby="email-error">
+      <p class="field-error" id="email-error" role="alert"><%= errors.email || '' %></p>
+    </div>
+
+    <div class="field">
+      <label for="password">Password</label>
+      <input id="password" name="password" type="password" required minlength="12" maxlength="128"
+             autocomplete="new-password" aria-describedby="password-hint password-error">
+      <p class="hint" id="password-hint">At least 12 characters. A passphrase of several words is ideal.</p>
+      <p class="field-error" id="password-error" role="alert"><%= errors.password || '' %></p>
+    </div>
+
+    <div class="field">
+      <label for="confirmPassword">Repeat password</label>
+      <input id="confirmPassword" name="confirmPassword" type="password" required maxlength="128"
+             autocomplete="new-password" data-match="password" aria-describedby="confirmPassword-error">
+      <p class="field-error" id="confirmPassword-error" role="alert"><%= errors.confirmPassword || '' %></p>
+    </div>
+
+    <button type="submit" class="button">Create account</button>
+    <p class="hint">Already registered? <a href="/login">Sign in</a>.</p>
+  </form>
+</section>
+
+<%- include('partials/footer') %>

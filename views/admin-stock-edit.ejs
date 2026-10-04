@@ -1,0 +1,40 @@
+<%- include('partials/header') %>
+
+<section class="narrow">
+  <p><a href="/admin/stocks">&larr; Back to stocks</a></p>
+  <h1>Edit <%= stock.symbol %></h1>
+
+  <form method="post" action="/admin/stocks/<%= stock.id %>/update" class="form" data-validate novalidate>
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+    <div class="field">
+      <label for="symbol">Symbol</label>
+      <input id="symbol" name="symbol" type="text" required maxlength="10" pattern="[A-Za-z][A-Za-z0-9.\-]{0,9}"
+             value="<%= values.symbol || '' %>" aria-describedby="symbol-error"
+             data-pattern-message="Use 1-10 characters: letters, digits, &quot;.&quot; or &quot;-&quot;.">
+      <p class="field-error" id="symbol-error" role="alert"><%= errors.symbol || '' %></p>
+    </div>
+    <div class="field">
+      <label for="name">Company name</label>
+      <input id="name" name="name" type="text" required maxlength="120" value="<%= values.name || '' %>"
+             aria-describedby="name-error">
+      <p class="field-error" id="name-error" role="alert"><%= errors.name || '' %></p>
+    </div>
+    <div class="field">
+      <label for="exchange">Exchange</label>
+      <input id="exchange" name="exchange" type="text" required maxlength="30" value="<%= values.exchange || '' %>"
+             aria-describedby="exchange-error">
+      <p class="field-error" id="exchange-error" role="alert"><%= errors.exchange || '' %></p>
+    </div>
+    <div class="field">
+      <label for="sector">Sector</label>
+      <input id="sector" name="sector" type="text" required maxlength="60" value="<%= values.sector || '' %>"
+             aria-describedby="sector-error">
+      <p class="field-error" id="sector-error" role="alert"><%= errors.sector || '' %></p>
+    </div>
+
+    <button type="submit" class="button">Save changes</button>
+  </form>
+</section>
+
+<%- include('partials/footer') %>

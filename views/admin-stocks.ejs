@@ -1,0 +1,74 @@
+<%- include('partials/header') %>
+
+<h1>Manage stocks</h1>
+
+<section class="card">
+  <h2>Stock catalogue</h2>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">Symbol</th><th scope="col">Name</th><th scope="col">Sector</th>
+          <th scope="col" class="num">Price</th><th scope="col">Updated</th><th scope="col" class="num">Watchers</th>
+          <th scope="col"><span class="visually-hidden">Actions</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% stocks.forEach((stock) => { %>
+          <tr>
+            <td><a href="/stocks/<%= stock.symbol %>"><strong><%= stock.symbol %></strong></a></td>
+            <td><%= stock.name %></td>
+            <td><%= stock.sector %></td>
+            <td class="num"><%= fmtPrice(stock.last_price) %></td>
+            <td><%= fmtDate(stock.last_price_at) %></td>
+            <td class="num"><%= stock.watchers %></td>
+            <td class="actions-cell">
+              <a class="button button-small button-secondary" href="/admin/stocks/<%= stock.id %>/edit">Edit</a>
+              <form method="post" action="/admin/stocks/<%= stock.id %>/delete" class="inline-form">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                <button type="submit" class="button button-small button-danger"
+                        data-confirm="Delete <%= stock.symbol %>? It will also be removed from every watchlist.">Delete</button>
+              </form>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="card">
+  <h2>Add a stock</h2>
+  <form method="post" action="/admin/stocks" class="form" data-validate novalidate>
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+    <div class="field">
+      <label for="symbol">Symbol</label>
+      <input id="symbol" name="symbol" type="text" required maxlength="10" pattern="[A-Za-z][A-Za-z0-9.\-]{0,9}"
+             value="<%= values.symbol || '' %>" aria-describedby="symbol-error"
+             data-pattern-message="Use 1-10 characters: letters, digits, &quot;.&quot; or &quot;-&quot;.">
+      <p class="field-error" id="symbol-error" role="alert"><%= errors.symbol || '' %></p>
+    </div>
+    <div class="field">
+      <label for="name">Company name</label>
+      <input id="name" name="name" type="text" required maxlength="120" value="<%= values.name || '' %>"
+             aria-describedby="name-error">
+      <p class="field-error" id="name-error" role="alert"><%= errors.name || '' %></p>
+    </div>
+    <div class="field">
+      <label for="exchange">Exchange</label>
+      <input id="exchange" name="exchange" type="text" required maxlength="30" value="<%= values.exchange || 'NASDAQ' %>"
+             aria-describedby="exchange-error">
+      <p class="field-error" id="exchange-error" role="alert"><%= errors.exchange || '' %></p>
+    </div>
+    <div class="field">
+      <label for="sector">Sector</label>
+      <input id="sector" name="sector" type="text" required maxlength="60" value="<%= values.sector || '' %>"
+             aria-describedby="sector-error">
+      <p class="field-error" id="sector-error" role="alert"><%= errors.sector || '' %></p>
+    </div>
+    <button type="submit" class="button">Add stock</button>
+  </form>
+</section>
+
+<%- include('partials/footer') %>

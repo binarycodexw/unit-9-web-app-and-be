@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%= title %> | <%= appName %></title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/css/styles.css">
+  <script src="/js/app.js" defer></script>
+  <% if (locals.withCharts) { %>
+    <script src="/vendor/chart.umd.min.js" defer></script>
+    <script src="/js/charts.js" defer></script>
+  <% } %>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="/"><span class="brand-mark" aria-hidden="true">&#9650;</span> <%= appName %></a>
+      <nav aria-label="Main navigation">
+        <% if (currentUser) { %>
+          <ul class="nav-list">
+            <li><a href="/dashboard">Dashboard</a></li>
+            <li><a href="/watchlists">Watchlists</a></li>
+            <li><a href="/stocks">Stocks</a></li>
+            <% if (currentUser.role === 'admin') { %>
+              <li><a href="/admin/stocks">Admin</a></li>
+            <% } %>
+            <li><a href="/account">Account</a></li>
+            <li>
+              <form method="post" action="/logout" class="inline-form">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                <button type="submit" class="button button-link">Sign out</button>
+              </form>
+            </li>
+          </ul>
+        <% } else { %>
+          <ul class="nav-list">
+            <li><a href="/login">Sign in</a></li>
+            <li><a class="button button-small" href="/register">Create account</a></li>
+          </ul>
+        <% } %>
+      </nav>
+    </div>
+  </header>
+  <main id="main" class="container">
+    <% if (flash) { %>
+      <div class="notice notice-<%= flash.type === 'error' ? 'error' : 'success' %>" role="status">
+        <%= flash.text %>
+      </div>
+    <% } %>

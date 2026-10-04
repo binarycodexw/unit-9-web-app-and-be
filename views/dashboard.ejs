@@ -1,0 +1,76 @@
+<%- include('partials/header') %>
+
+<h1>Dashboard</h1>
+<p class="lead">Signed in as <strong><%= currentUser.email %></strong>.</p>
+
+<% if (!currentUser.mfa_enabled) { %>
+  <div class="notice notice-warning" role="note">
+    Two-factor authentication is not enabled. <a href="/account/mfa/setup">Protect your account now</a>.
+  </div>
+<% } %>
+
+<section class="grid grid-2">
+  <article class="card">
+    <h2>Stocks you follow</h2>
+    <p class="big-number"><%= watchedCount %></p>
+    <p>in <%= watchlists.length %> watchlist<%= watchlists.length === 1 ? '' : 's' %>.
+      <a href="/watchlists">Manage watchlists</a></p>
+  </article>
+  <article class="card">
+    <h2>Biggest movers (30 days)</h2>
+    <% if (movers.length === 0) { %>
+      <p class="muted">Add stocks to a watchlist to see how they moved.</p>
+    <% } else { %>
+      <ul class="plain-list">
+        <% movers.forEach((item) => { %>
+          <li class="list-row">
+            <a href="/stocks/<%= item.symbol %>"><strong><%= item.symbol %></strong></a>
+            <span class="change <%= item.change >= 0 ? 'up' : 'down' %>"><%= fmtPercent(item.change) %></span>
+          </li>
+        <% }) %>
+      </ul>
+    <% } %>
+  </article>
+</section>
+
+<% watchlists.forEach((list) => { %>
+  <section class="card">
+    <div class="card-header">
+      <h2><a href="/watchlists/<%= list.id %>"><%= list.name %></a></h2>
+      <a class="button button-small button-secondary" href="/watchlists/<%= list.id %>">Open</a>
+    </div>
+    <% if (list.items.length === 0) { %>
+      <p class="muted">This watchlist is empty. <a href="/stocks">Browse stocks</a> to add some.</p>
+    <% } else { %>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th scope="col">Symbol</th><th scope="col">Name</th><th scope="col">30 days</th><th scope="col" class="num">Change</th><th scope="col" class="num">Price</th><th scope="col" class="num">Target</th><th scope="col">Updated</th></tr>
+          </thead>
+          <tbody>
+            <% list.items.forEach((item) => { %>
+              <tr>
+                <td><a href="/stocks/<%= item.symbol %>"><%= item.symbol %></a></td>
+                <td><%= item.name %></td>
+                <td>
+                  <% if (item.sparkJson) { %>
+                    <span class="spark"><canvas data-chart="<%= item.sparkJson %>" role="img"
+                      aria-label="30-day trend of <%= item.symbol %>"></canvas></span>
+                  <% } else { %>
+                    <span class="muted">n/a</span>
+                  <% } %>
+                </td>
+                <td class="num change <%= item.change === null ? '' : (item.change >= 0 ? 'up' : 'down') %>"><%= fmtPercent(item.change) %></td>
+                <td class="num"><%= fmtPrice(item.last_price) %></td>
+                <td class="num"><%= item.target_price ? fmtPrice(item.target_price) : '-' %></td>
+                <td><%= fmtDate(item.last_price_at) %></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    <% } %>
+  </section>
+<% }) %>
+
+<%- include('partials/footer') %>
