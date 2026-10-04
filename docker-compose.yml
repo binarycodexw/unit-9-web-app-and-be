@@ -1,0 +1,17 @@
+# local postgres for development: docker compose up -d
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: watchlist-db
+    environment:
+      POSTGRES_USER: watchlist
+      POSTGRES_PASSWORD: change_me
+      POSTGRES_DB: watchlist
+    ports:
+      # 5433 because 5432 is often taken by a local postgres
+      - "127.0.0.1:5433:5432"
+    volumes:
+      - watchlist-data:/var/lib/postgresql/data
+
+volumes:
+  watchlist-data:

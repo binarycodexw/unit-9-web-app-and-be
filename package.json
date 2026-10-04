@@ -1,0 +1,35 @@
+{
+  "name": "watchlist-secure-app",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Secure stock watchlist web application (Node.js, Express, PostgreSQL) with MFA.",
+  "type": "module",
+  "main": "server.js",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "db:init": "node scripts/init-db.js",
+    "db:seed": "node scripts/init-db.js --seed",
+    "db:reset": "node scripts/init-db.js --reset --seed",
+    "test": "node --test tests/e2e.test.js tests/prices.test.js"
+  },
+  "license": "UNLICENSED",
+  "dependencies": {
+    "argon2": "^0.45.1",
+    "chart.js": "^4.5.1",
+    "connect-pg-simple": "^10.0.0",
+    "dotenv": "^18.0.5",
+    "ejs": "^6.0.1",
+    "express": "^5.1.0",
+    "express-rate-limit": "^8.0.0",
+    "express-session": "^1.18.0",
+    "helmet": "^8.0.0",
+    "otplib": "^13.5.0",
+    "pg": "^8.16.0",
+    "qrcode": "^1.5.4",
+    "zod": "^3.25.0"
+  }
+}
