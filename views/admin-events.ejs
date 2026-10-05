@@ -1,0 +1,62 @@
+<%- include('partials/header') %>
+
+<h1>Security log</h1>
+
+<section class="card">
+  <form method="get" action="/admin/events" class="form form-inline">
+    <div class="field">
+      <label for="type">Event type</label>
+      <select id="type" name="type">
+        <option value="">All events</option>
+        <% types.forEach((type) => { %>
+          <option value="<%= type %>" <%= filters.type === type ? 'selected' : '' %>><%= type %></option>
+        <% }) %>
+      </select>
+    </div>
+    <button type="submit" class="button">Filter</button>
+    <a class="button button-secondary" href="/admin/events">Reset</a>
+  </form>
+</section>
+
+<section class="card">
+  <p class="muted"><%= totalResults %> event<%= totalResults === 1 ? '' : 's' %>, newest first</p>
+  <% if (events.length === 0) { %>
+    <p>No events to show.</p>
+  <% } else { %>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">When</th><th scope="col">Event</th><th scope="col">User</th>
+            <th scope="col">IP address</th><th scope="col">Details</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% events.forEach((event) => { %>
+            <tr>
+              <td><%= fmtDateTime(event.created_at) %></td>
+              <td><%= event.event_type %></td>
+              <td><%= event.email || 'n/a' %></td>
+              <td><%= event.ip_address || 'n/a' %></td>
+              <td><%= event.details %></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+
+    <% if (pages > 1) { %>
+      <nav class="pagination" aria-label="Pagination">
+        <% if (filters.page > 1) { %>
+          <a class="page" href="/admin/events?type=<%= encodeURIComponent(filters.type) %>&amp;page=<%= filters.page - 1 %>">Previous</a>
+        <% } %>
+        <span class="page current" aria-current="page">Page <%= filters.page %> of <%= pages %></span>
+        <% if (filters.page < pages) { %>
+          <a class="page" href="/admin/events?type=<%= encodeURIComponent(filters.type) %>&amp;page=<%= filters.page + 1 %>">Next</a>
+        <% } %>
+      </nav>
+    <% } %>
+  <% } %>
+</section>
+
+<%- include('partials/footer') %>

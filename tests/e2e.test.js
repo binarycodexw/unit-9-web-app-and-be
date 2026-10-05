@@ -269,6 +269,7 @@ describe('CRUD and access control', () => {
     const browser = new Browser();
     await registerAndLogin(browser);
     assert.equal((await browser.request('/admin/stocks')).status, 403);
+    assert.equal((await browser.request('/admin/events')).status, 403);
     assert.equal((await browser.post('/admin/refresh', {}, '/account')).status, 403);
     assert.equal((await browser.post('/admin/stocks', { symbol: 'EVIL', name: 'x', exchange: 'x', sector: 'x' }, '/account')).status, 403);
   });
@@ -295,8 +296,17 @@ describe('CRUD and access control', () => {
     const gone = await query('SELECT 1 FROM stocks WHERE id = $1', [rows[0].id]);
     assert.equal(gone.rowCount, 0);
 
-    // security log page and refresh buttons are gone
-    assert.equal((await browser.request('/admin/events')).status, 404);
+    // the security log shows what was just done, and can be filtered
+    const log = await browser.request('/admin/events');
+    assert.equal(log.status, 200);
+    assert.match(log.text, /stock_created/);
+    assert.match(log.text, /TSTX/);
+    const filtered = await browser.request('/admin/events?type=stock_deleted&page=1');
+    assert.equal(filtered.status, 200);
+    assert.match(filtered.text, /<td>stock_deleted<\/td>/);
+    assert.ok(!filtered.text.includes('<td>stock_created</td>'), 'filter keeps only the chosen event type');
+
+    // there are no manual refresh controls
     assert.equal((await browser.post('/admin/refresh', {}, '/admin/stocks')).status, 404);
     const page = await browser.request('/admin/stocks');
     assert.ok(!page.text.includes('Refresh'), 'no manual refresh controls');

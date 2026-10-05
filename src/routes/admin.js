@@ -4,7 +4,9 @@ import { requireAdmin, requireAuth } from '../middleware/auth.js';
 import { logSecurityEvent } from '../utils/audit.js';
 import { flash } from '../utils/session.js';
 import { parseForm, parseId, safeValues } from '../validation/parse.js';
-import { stockSchema } from '../validation/schemas.js';
+import { eventLogSchema, stockSchema } from '../validation/schemas.js';
+
+const EVENTS_PAGE_SIZE = 25;
 
 const router = Router();
 // only under /admin, other unknown urls still get a normal 404
@@ -118,6 +120,45 @@ router.post('/admin/stocks/:id/delete', async (req, res, next) => {
   await logSecurityEvent(req, 'stock_deleted', { details: result.rows[0].symbol });
   flash(req, 'success', `${result.rows[0].symbol} deleted.`);
   return res.redirect('/admin/stocks');
+});
+
+// security log, newest first
+
+router.get('/admin/events', async (req, res) => {
+  const { data } = parseForm(eventLogSchema, req.query);
+  const filters = data ?? { type: '', page: 1 };
+
+  const params = [];
+  let where = '';
+  if (filters.type) {
+    params.push(filters.type);
+    where = 'WHERE e.event_type = $1';
+  }
+
+  const total = await query(`SELECT COUNT(*)::int AS total FROM security_events e ${where}`, params);
+  const pages = Math.max(1, Math.ceil(total.rows[0].total / EVENTS_PAGE_SIZE));
+  const page = Math.min(filters.page, pages);
+
+  const listParams = [...params, EVENTS_PAGE_SIZE, (page - 1) * EVENTS_PAGE_SIZE];
+  const events = await query(
+    `SELECT e.created_at, e.event_type, e.ip_address, e.details, u.email
+       FROM security_events e
+       LEFT JOIN users u ON u.id = e.user_id
+       ${where}
+      ORDER BY e.created_at DESC, e.id DESC
+      LIMIT $${listParams.length - 1} OFFSET $${listParams.length}`,
+    listParams,
+  );
+  const types = await query('SELECT DISTINCT event_type FROM security_events ORDER BY event_type ASC');
+
+  res.render('admin-events', {
+    title: 'Security log',
+    events: events.rows,
+    types: types.rows.map((row) => row.event_type),
+    filters: { ...filters, page },
+    pages,
+    totalResults: total.rows[0].total,
+  });
 });
 
 export default router;

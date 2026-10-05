@@ -100,6 +100,11 @@ export const stockSearchSchema = z.object({
 });
 
 // chart periods in days, anything else falls back to 60
+export const eventLogSchema = z.object({
+  type: z.string().trim().max(40).default(''),
+  page: z.coerce.number().int().min(1).max(10_000).catch(1).default(1),
+});
+
 export const RANGE_OPTIONS = [30, 60, 100];
 export const stockRangeSchema = z.object({
   range: z.enum(['30', '60', '100']).catch('60').default('60'),

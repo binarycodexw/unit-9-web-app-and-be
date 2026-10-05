@@ -74,7 +74,7 @@ provider error and never makes two calls for the same stock at once.
 - **A06 Components:** `npm audit` reports no vulnerabilities, lock file is committed.
 - **A07 Authentication:** passwords of at least 12 characters and a list of common passwords is refused, rate limiting, TOTP codes can't be reused, new session after login.
 - **A08 Integrity:** the Alpha Vantage response is validated before it is saved.
-- **A09 Logging:** sign-ins, failures, lock-outs, MFA changes and admin actions go to the `security_events` table.
+- **A09 Logging:** sign-ins, failures, lock-outs, MFA changes and admin actions go to the `security_events` table, and administrators can read them on the Security log page (`/admin/events`).
 - **A10 SSRF:** the Alpha Vantage URL is fixed, symbols are checked against a pattern, 8 second timeout, redirects are not followed.
 
 ## Deploying
